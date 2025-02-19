@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import time
+import timeit
 import math
 from decimal import Context, Decimal, ROUND_HALF_EVEN
 import sys
@@ -33,7 +34,6 @@ def fib_memo(n):
     for i in range(2, n + 1):
         memo.append(memo[i - 1] + memo[i - 2])
     return memo[n]
-
 
 
 def fib_matrix(n):
@@ -77,10 +77,11 @@ def power(F, n):
 
 def fib_binet(n):
     ctx = Context(prec=60, rounding=ROUND_HALF_EVEN)
-    phi = Decimal((1 + Decimal(5**(1/2))))
-    phi1 = Decimal((1 - Decimal(5**(1/2))))
+    sqrt_5 = Decimal(5).sqrt()
+    phi = (1 + sqrt_5) / 2
+    psi = (1 - sqrt_5) / 2
 
-    return int((ctx.power(phi, Decimal(n)) - ctx.power(phi1, Decimal(n))) / (2**n * Decimal(5**(1/2))))
+    return int((ctx.power(phi, Decimal(n)) - ctx.power(psi, Decimal(n))) / sqrt_5)
 
 
 def fib_fast_doubling_main(n):
@@ -101,22 +102,29 @@ def fib_fast_doubling(n):
 def measure_time(func, terms):
     times = []
     for n in terms:
-        start = time.perf_counter()
+        start = time.process_time()
         func(n)
-        end = time.perf_counter()
+        end = time.process_time()
         times.append(end - start)
+        # times.append(timeit.timeit(lambda: func(n), number=1))
     return times
 
 
 def main():
     terms_list_short = [5, 7, 10, 12, 15, 17, 20, 22, 25, 27, 30, 32, 35, 37, 40, 42, 45]
-    terms_list_long = [501, 631, 794, 1000, 1259, 1585, 1995, 2512, 3162, 3981, 5012, 6310, 7943, 10000, 12589, 15849]
+    # terms_list_long = [501, 631, 794, 1000, 1259, 1585, 1995, 2512, 3162, 3981, 5012, 6310, 7943, 10000, 12589, 15849]
+    terms_list_long = [
+        501, 631, 794, 1000, 1259, 1585, 1995, 2512, 3162, 3981,
+        5012, 6310, 7943, 10000, 12589, 15849, 19953, 25118, 31623,
+        39810, 50118, 63096, 79433, 100000, 125892
+    ]
+
     algorithms = [
-        ("Recursive", fib_recursive, terms_list_short),
-        ("Recursive Memo", fib_memo_recursive, terms_list_short),
+        # ("Recursive", fib_recursive, terms_list_short),
+        # ("Recursive Memo", fib_memo_recursive, terms_list_short),
         ("Iterative", fib_iterative, terms_list_long),
         ("DP Memoization", fib_memo, terms_list_long),
-        ("Matrix", fib_matrix, terms_list_long),
+        ("Matrix Fast Exponentiation", fib_matrix, terms_list_long),
         ("Binet", fib_binet, terms_list_long),
         ("Fast Doubling", fib_fast_doubling_main, terms_list_long)
     ]
@@ -139,6 +147,8 @@ def main():
     for name, times in results.items():
         if "Recursive" not in name:
             plt.plot(terms_list_long, times, label=name, marker='o')
+        # if "Fast" in name:
+        #     plt.plot(terms_list_long, times, label=name, marker='o')
 
     plt.xlabel("Fibonacci Term")
     plt.ylabel("Execution Time (s)")
