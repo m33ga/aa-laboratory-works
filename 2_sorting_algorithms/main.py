@@ -19,9 +19,9 @@ def generate_arrays(length):
 
 def benchmark_algo(algo, arr):
     arr_copy = np.copy(arr)
-    start_time = time.perf_counter()
+    start_time = time.process_time()
     algo(arr_copy)
-    end_time = time.perf_counter()
+    end_time = time.process_time()
     return end_time - start_time
 
 
