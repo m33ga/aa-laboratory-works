@@ -50,3 +50,23 @@ def plot_algorithm_group(data, title, algorithms):
     plt.tight_layout()
     plt.show()
 
+
+def plot_all_batches():
+    plot_algorithm_group(
+        load_results("traversal_results.csv"),
+        title="DFS vs BFS (Traversal Algorithms)",
+        algorithms=["DFS", "BFS"]
+    )
+
+    plot_algorithm_group(
+        load_results("mst_results.csv"),
+        title="Prim vs Kruskal (MST Algorithms)",
+        algorithms=["Prim", "Kruskal"]
+    )
+
+    plot_algorithm_group(
+        load_results("shortestpaths_results.csv"),
+        title="Dijkstra vs Floyd-Warshall (Shortest Path Algorithms)",
+        algorithms=["Dijkstra", "FloydWarshall"]
+    )
+
