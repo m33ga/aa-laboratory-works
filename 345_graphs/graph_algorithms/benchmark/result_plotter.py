@@ -25,3 +25,28 @@ def group_results_by_density(data, sparse_threshold=0.3):
         density_group = "sparse" if row["density"] <= sparse_threshold else "dense"
         grouped[alg][density_group][nodes].append(row["time"])
     return grouped
+
+
+def average(values):
+    return sum(values) / len(values) if values else 0
+
+
+def plot_algorithm_group(data, title, algorithms):
+    grouped = group_results_by_density(data)
+
+    plt.figure()
+    for alg in algorithms:
+        for density_group in ["sparse", "dense"]:
+            nodes = sorted(grouped[alg][density_group].keys())
+            times = [average(grouped[alg][density_group][n]) for n in nodes]
+            label = f"{alg} ({density_group})"
+            plt.plot(nodes, times, marker="o", label=label)
+
+    plt.xlabel("Number of Nodes")
+    plt.ylabel("Execution Time (s)")
+    plt.title(title)
+    plt.legend()
+    plt.grid()
+    plt.tight_layout()
+    plt.show()
+
