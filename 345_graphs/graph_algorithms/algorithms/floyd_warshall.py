@@ -1,16 +1,21 @@
-def floyd_warshall(graph):
-    nodes = list(graph.keys())
-    dist = {u: {v: float('inf') for v in nodes} for u in nodes}
+def floyd_warshall(graph, num_nodes):
+    dist = [[float('inf')] * num_nodes for _ in range(num_nodes)]
+    prev = [[None] * num_nodes for _ in range(num_nodes)]
 
-    for u in nodes:
-        dist[u][u] = 0
-        for v, w in graph[u]:
+    for i in range(num_nodes):
+        dist[i][i] = 0
+        prev[i][i] = None
+
+    for u in range(num_nodes):
+        for v, w in graph.get(u, {}).items():
             dist[u][v] = w
+            prev[u][v] = u
 
-    for k in nodes:
-        for i in nodes:
-            for j in nodes:
+    for k in range(num_nodes):
+        for i in range(num_nodes):
+            for j in range(num_nodes):
                 if dist[i][j] > dist[i][k] + dist[k][j]:
                     dist[i][j] = dist[i][k] + dist[k][j]
+                    prev[i][j] = prev[k][j]
 
-    return dist
+    return dist, prev
