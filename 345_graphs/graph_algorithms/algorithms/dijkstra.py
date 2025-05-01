@@ -3,6 +3,7 @@ import heapq
 
 def dijkstra(graph, start=0):
     dist = {node: float('inf') for node in graph}
+    prev = {node: -1 for node in graph}
     dist[start] = 0
     heap = [(0, start)]
 
@@ -14,5 +15,6 @@ def dijkstra(graph, start=0):
             new_dist = curr_dist + weight
             if new_dist < dist[v]:
                 dist[v] = new_dist
+                prev[v] = u
                 heapq.heappush(heap, (new_dist, v))
-    return dist
+    return dist, prev
