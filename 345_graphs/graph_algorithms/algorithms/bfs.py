@@ -1,15 +1,15 @@
 from collections import deque
 
 
-def bfs(graph, start):
-    visited = set()
+def bfs(graph, num_nodes, start=0):  # index based
+    visited = [False] * num_nodes
     queue = deque([start])
-    visited.add(start)
+    visited[start] = True
 
     while queue:
         node = queue.popleft()
-        for neighbor, _ in graph.get(node, []):
-            if neighbor not in visited:
-                visited.add(neighbor)
+        for neighbor in graph.get(node, []):
+            if not visited[neighbor]:
+                visited[neighbor] = True
                 queue.append(neighbor)
-    return visited
+    return [i for i, v in enumerate(visited) if v]
