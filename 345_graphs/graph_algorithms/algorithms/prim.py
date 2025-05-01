@@ -27,7 +27,4 @@ def prim(graph, num_nodes, start=0):
                 if not visited[neighbor]:
                     heapq.heappush(heap, (w, v, neighbor))
 
-    if len(mst_edges) < num_nodes - 1:
-        raise TypeError("Graph is Disconnected. MST covers only one component.")
-
     return mst_edges, total_cost
