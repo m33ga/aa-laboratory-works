@@ -1,20 +1,33 @@
 import heapq
 
 
-def prim(graph):
-    visited = set()
-    mst = []
-    start = next(iter(graph))
-    visited.add(start)
-    heap = [(weight, start, neighbor) for neighbor, weight in graph[start]]
-    heapq.heapify(heap)
+def prim(graph, num_nodes, start=0):
+    if num_nodes == 0:
+        return [], 0
 
-    while heap and len(visited) < len(graph):
+    visited = [False] * num_nodes
+    mst_edges = []
+    total_cost = 0
+
+    heap = []
+    visited[start] = True
+
+    for neighbor, weight in graph.get(start, {}).items():
+        if not visited[neighbor]:
+            heapq.heappush(heap, (weight, start, neighbor))
+
+    while heap and len(mst_edges) < num_nodes - 1:
         weight, u, v = heapq.heappop(heap)
-        if v not in visited:
-            visited.add(v)
-            mst.append((u, v, weight))
-            for neighbor, w in graph[v]:
-                if neighbor not in visited:
+        if not visited[v]:
+            visited[v] = True
+            mst_edges.append((u, v, weight))
+            total_cost += weight
+
+            for neighbor, w in graph.get(v, {}).items():
+                if not visited[neighbor]:
                     heapq.heappush(heap, (w, v, neighbor))
-    return mst
+
+    if len(mst_edges) < num_nodes - 1:
+        raise TypeError("Graph is Disconnected. MST covers only one component.")
+
+    return mst_edges, total_cost
