@@ -1,7 +1,7 @@
 import heapq
 
 
-def dijkstra(graph, start):
+def dijkstra(graph, start=0):
     dist = {node: float('inf') for node in graph}
     dist[start] = 0
     heap = [(0, start)]
@@ -10,7 +10,7 @@ def dijkstra(graph, start):
         curr_dist, u = heapq.heappop(heap)
         if curr_dist > dist[u]:
             continue
-        for v, weight in graph[u]:
+        for v, weight in graph.get(u, {}).items():
             new_dist = curr_dist + weight
             if new_dist < dist[v]:
                 dist[v] = new_dist
