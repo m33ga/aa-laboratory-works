@@ -5,7 +5,7 @@ import numpy as np
 
 class Graph:
     def __init__(self):
-        # Dictionary of adjacency lists: node -> list of (neighbor, weight)
+        # Dictionary of dictionaries: node -> {neighbor: weight}
         self.graph = {}
 
         self.metadata = {
@@ -19,10 +19,10 @@ class Graph:
             "forest": False,
             "cyclic": False,
             "grid": False,
-            "diameter": None,  # 'deep', 'shallow', 'low_diameter', 'high_diameter'
+            "diameter": None,
             "connected": True,
             "disconnected": False,
-            "weight_distribution": None,  # 'uniform', 'skewed', 'local_high', 'negative'
+            "weight_distribution": None,
             "weighted_edges": True,
             "negative_weights": False,
         }
@@ -30,31 +30,26 @@ class Graph:
     def add_edge(self, u, v, weight=1):
         """Add a directed edge from u to v with given weight."""
         if u not in self.graph:
-            self.graph[u] = []
+            self.graph[u] = {}
         if v not in self.graph:
-            self.graph[v] = []
-        self.graph[u].append((v, weight))
+            self.graph[v] = {}
+        self.graph[u][v] = weight
 
     def add_undirected_edge(self, u, v, weight=1):
-        """Add undirected edge between u and v."""
         self.add_edge(u, v, weight)
         self.add_edge(v, u, weight)
 
-    def get_unweighted(self):
-        """
-        Return a new graph as dictionary of adjacency lists without weights.
-        Useful for BFS/DFS.
-        """
+    def get_unweighted(self, use_sets=False):
         unweighted_graph = {}
         for u in self.graph:
-            unweighted_graph[u] = [v for v, _ in self.graph[u]]
+            neighbors = list(self.graph[u].keys())
+            if use_sets:
+                unweighted_graph[u] = set(neighbors)
+            else:
+                unweighted_graph[u] = neighbors
         return unweighted_graph
 
     def to_adj_matrix(self):
-        """
-        Convert the graph to a dense adjacency matrix (NumPy array).
-        Nodes must be labeled 0 to n-1.
-        """
         nodes = sorted(self.graph.keys())
         n = len(nodes)
         index_map = {node: i for i, node in enumerate(nodes)}
@@ -63,7 +58,7 @@ class Graph:
         np.fill_diagonal(adj_matrix, 0)
 
         for u in self.graph:
-            for v, w in self.graph[u]:
+            for v, w in self.graph[u].items():
                 adj_matrix[index_map[u]][index_map[v]] = w
         return adj_matrix
 
@@ -93,9 +88,8 @@ class Graph:
 
     def generate_complete(self, num_nodes, directed=False, weighted=False, weight_range=(1, 10)):
         self.graph.clear()
-
         for node in range(num_nodes):
-            self.graph[node] = []
+            self.graph[node] = {}
 
         for u in range(num_nodes):
             for v in range(num_nodes):
@@ -103,9 +97,9 @@ class Graph:
                     if not directed and u > v:
                         continue
                     weight = random.randint(*weight_range) if weighted else 1
-                    self.add_edge(u, v, weight)
+                    self.graph[u][v] = weight
                     if not directed:
-                        self.add_edge(v, u, weight)
+                        self.graph[v][u] = weight
 
         self._update_metadata(
             name="Complete Graph",
@@ -122,12 +116,12 @@ class Graph:
 
     def generate_tree(self, num_nodes, deep=False, wide=False, weighted=True, weight_range=(1, 10)):
         if wide:
-            branching_factor = max(2, num_nodes // 5)  # shallow & wide
+            branching_factor = max(2, num_nodes // 5)
             depth = int(np.log(num_nodes) / np.log(branching_factor))
             G = nx.balanced_tree(branching_factor, depth)
             diameter_type = 'shallow'
         elif deep:
-            branching_factor = 2  # deep & narrow
+            branching_factor = 2
             depth = int(np.log(num_nodes) / np.log(branching_factor))
             G = nx.balanced_tree(branching_factor, depth)
             diameter_type = 'deep'
@@ -149,15 +143,11 @@ class Graph:
 
     def generate_deep_tree(self, num_nodes, weighted=True, weight_range=(1, 10)):
         self.generate_tree(num_nodes, deep=True, weighted=weighted, weight_range=weight_range)
-        self._update_metadata(
-            name="Random Deep&Narrow Tree"
-        )
+        self._update_metadata(name="Random Deep&Narrow Tree")
 
     def generate_shallow_tree(self, num_nodes, weighted=True, weight_range=(1, 10)):
         self.generate_tree(num_nodes, wide=True, weighted=weighted, weight_range=weight_range)
-        self._update_metadata(
-            name="Random Shallow&Wide Tree"
-        )
+        self._update_metadata(name="Random Shallow&Wide Tree")
 
     def generate_disconnected(self, nodes_per_component=(10, 10), directed=False, weighted=True):
         G = nx.empty_graph(0)
@@ -167,7 +157,6 @@ class Graph:
             mapping = {i: i + total_nodes for i in range(n)}
             G = nx.union(G, nx.relabel_nodes(g, mapping))
             total_nodes += n
-
         self._nx_to_graph(G, weighted=weighted)
         self._update_metadata(
             name="Disconnected Random",
@@ -230,24 +219,17 @@ class Graph:
         )
 
     def generate_acyclic(self, num_nodes, directed=True, weighted=True, weight_range=(1, 10)):
-        """
-        Generate an acyclic directed graph with guaranteed topological ordering.
-        Ensures no cycles by only allowing edges u -> v where u < v.
-        """
         self.graph.clear()
         nodes = list(range(num_nodes))
         edge_count = int(0.5 * num_nodes * (num_nodes - 1))
-
         edges = set()
         while len(edges) < edge_count:
             u, v = random.sample(nodes, 2)
             if u != v and u < v:
                 edges.add((u, v))
-
         for u, v in edges:
             w = random.randint(*weight_range) if weighted else 1
-            self.add_edge(u, v, w)
-
+            self.graph.setdefault(u, {})[v] = w
         self._update_metadata(
             name="Acyclic Random DAG",
             type="Acyclic",
@@ -266,25 +248,18 @@ class Graph:
             if weight_distribution == 'uniform':
                 w = 1
             elif weight_distribution == 'skewed':
-                w = random.choice([1, 1, 1, 1, 10])  # mostly small
+                w = random.choice([1, 1, 1, 1, 10])
             elif weight_distribution == 'local_high':
-                if u == 0 or v == 0:
-                    w = random.randint(50, 100)
-                else:
-                    w = random.randint(1, 10)
+                w = random.randint(50, 100) if u == 0 or v == 0 else random.randint(1, 10)
             elif weight_distribution == 'random':
                 w = random.randint(1, 100)
             elif weight_distribution == 'negative':
                 w = random.randint(-10, 10)
             else:
                 w = 1
-
-            if u not in self.graph:
-                self.graph[u] = []
-            if v not in self.graph:
-                self.graph[v] = []
-
-            self.graph[u].append((v, w))
+            self.graph.setdefault(u, {})[v] = w
+            if not directed:
+                self.graph.setdefault(v, {})[u] = w
 
         self._update_metadata(
             name=f"Weighted ({weight_distribution})",
@@ -299,11 +274,9 @@ class Graph:
         self.graph.clear()
         for u, v in nx_graph.edges():
             w = random.randint(*weight_range) if weighted else 1
-            if u not in self.graph:
-                self.graph[u] = []
-            if v not in self.graph:
-                self.graph[v] = []
-            self.graph[u].append((v, w))
+            self.graph.setdefault(u, {})[v] = w
+            if not nx_graph.is_directed():
+                self.graph.setdefault(v, {})[u] = w
 
     def _update_metadata(self, **kwargs):
         for k, v in kwargs.items():
@@ -316,7 +289,7 @@ class Graph:
                 print(f"  {key}: {value}")
 
     def get_graph(self):
-        return self.graph.copy()
+        return {u: dict(neighbors) for u, neighbors in self.graph.items()}
 
     def get_metadata(self):
         return self.metadata.copy()
