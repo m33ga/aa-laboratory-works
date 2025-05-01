@@ -1,10 +1,11 @@
-def dfs(graph, start):
-    visited = set()
+def dfs(graph, num_nodes, start=0):
+    visited = [False] * num_nodes
     stack = [start]
     while stack:
         node = stack.pop()
-        if node not in visited:
-            visited.add(node)
-            neighbors = [neighbor for neighbor, _ in graph.get(node, [])]
-            stack.extend(reversed(neighbors))
-    return visited
+        if not visited[node]:
+            visited[node] = True
+            for neighbor in reversed(graph.get(node, [])):
+                if not visited[neighbor]:
+                    stack.append(neighbor)
+    return [i for i, v in enumerate(visited) if v]
