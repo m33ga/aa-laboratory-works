@@ -1,4 +1,4 @@
-def kruskal(graph):
+def kruskal(graph, num_nodes):
     edges = []
     node_to_idx = {}
     idx = 0
