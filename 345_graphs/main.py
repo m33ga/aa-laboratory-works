@@ -91,23 +91,24 @@ def benchmark(graph_name, graph_gen, graph_sizes, algo1, algo2, algo3, algo4, al
     return results12, results34, results56
 
 
-graph_generators = {
-    "Sparse": lambda g, size: g.sparse(size),
-    "Dense": lambda g, size: g.dense(size),
-    "Regular": lambda g, size: g.regular(size),
-    "Bipartite": lambda g, size: g.bipartite(size),
-    "Tree Deep": lambda g, size: g.deep_narrow_tree(size),
-    "Tree Shallow": lambda g, size: g.shallow_wide_tree(size),
-    "Grid": lambda g, size: g.grid(size),
-    "Cycle": lambda g, size: g.cycle(size),
-    "With Sub-Cycle": lambda g, size: g.with_cyclic_subgraph(size),
-    "With Self-Loops": lambda g, size: g.with_self_loops(size),
-    "Acyclic": lambda g, size: g.acyclic(size),
-    "Complete": lambda g, size: g.complete(size),
-    "Negative Weight": lambda g, size: g.with_negative_weights(size),
-    "Scale Free": lambda g, size: g.scale_free(size),
-    "Random": lambda g, size: g.random(size),
-}
+def main():
+    graph_generators = {
+        "Sparse": lambda g, size: g.sparse(size),
+        "Dense": lambda g, size: g.dense(size),
+        "Regular": lambda g, size: g.regular(size),
+        "Bipartite": lambda g, size: g.bipartite(size),
+        "Tree Deep": lambda g, size: g.deep_narrow_tree(size),
+        "Tree Shallow": lambda g, size: g.shallow_wide_tree(size),
+        "Grid": lambda g, size: g.grid(size),
+        "Cycle": lambda g, size: g.cycle(size),
+        "With Sub-Cycle": lambda g, size: g.with_cyclic_subgraph(size),
+        "With Self-Loops": lambda g, size: g.with_self_loops(size),
+        "Acyclic": lambda g, size: g.acyclic(size),
+        "Complete": lambda g, size: g.complete(size),
+        "Negative Weight": lambda g, size: g.with_negative_weights(size),
+        "Scale Free": lambda g, size: g.scale_free(size),
+        "Random": lambda g, size: g.random(size),
+    }
 
 sizes = [10, 100, 200, 300, 500]
 table = PrettyTable()
