@@ -5,16 +5,20 @@ from prettytable import PrettyTable
 import time
 
 
-def plot_results(res, num_nodes_lst, title):
-    plt.figure()
-    for algo_name, res_lst in res.items():
-        plt.plot(num_nodes_lst, res_lst, label=algo_name)
+def plot_results(res, num_nodes_lst, title, colors):
+    plt.figure(figsize=(10, 6))
 
-    plt.legend()
+    for idx, (algo_name, res_lst) in enumerate(res.items()):
+        color = colors[idx % len(colors)]
+        plt.plot(num_nodes_lst, res_lst, label=algo_name, color=color, linewidth=2)
+
     plt.title(title)
-    plt.grid()
-    plt.xlabel("num of nodes")
-    plt.ylabel("time")
+    plt.xlabel("Number of Nodes", fontsize=12)
+    plt.ylabel("Execution Time (seconds)", fontsize=12)
+    plt.xticks(num_nodes_lst)
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.legend(fontsize=10, loc='best')
+    plt.tight_layout()
     plt.show()
 
 
@@ -61,9 +65,10 @@ def benchmark(graph_name, graph_gen, graph_sizes, algo1, algo2, algo3, algo4, al
         timer, _ = time_function(algo6, graph, num_nodes)
         results56[algo6.__name__].append(timer)
 
-    plot_results(results12, graph_sizes, f"{algo1.__name__.upper()} and {algo2.__name__.upper()} on {graph_name} graph")
-    plot_results(results34, graph_sizes, f"{algo3.__name__.upper()} and {algo4.__name__.upper()} on {graph_name} graph")
-    plot_results(results56, graph_sizes, f"{algo5.__name__.upper()} and {algo6.__name__.upper()} on {graph_name} graph")
+    colors = plt.cm.tab10.colors
+    plot_results(results12, graph_sizes, f"{algo1.__name__.upper()} and {algo2.__name__.upper()} on {graph_name} graph", colors=colors[0:2])
+    plot_results(results34, graph_sizes, f"{algo3.__name__.upper()} and {algo4.__name__.upper()} on {graph_name} graph", colors=colors[2:4])
+    plot_results(results56, graph_sizes, f"{algo5.__name__.upper()} and {algo6.__name__.upper()} on {graph_name} graph", colors=colors[4:6])
     return results12, results34, results56
 
 
