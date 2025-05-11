@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def floyd_warshall(graph, num_nodes):
+def floyd(graph, num_nodes):
     INF = float('inf')
     dist = np.full((num_nodes, num_nodes), INF)
     prev = np.full((num_nodes, num_nodes), -1)
