@@ -1,21 +1,24 @@
+import numpy as np
+
+
 def floyd_warshall(graph, num_nodes):
-    dist = [[float('inf')] * num_nodes for _ in range(num_nodes)]
-    prev = [[None] * num_nodes for _ in range(num_nodes)]
+    INF = float('inf')
+    dist = np.full((num_nodes, num_nodes), INF)
+    prev = np.full((num_nodes, num_nodes), -1)
 
     for i in range(num_nodes):
-        dist[i][i] = 0
-        prev[i][i] = None
+        dist[i, i] = 0
+        prev[i, i] = -1
 
     for u in range(num_nodes):
         for v, w in graph.get(u, {}).items():
-            dist[u][v] = w
-            prev[u][v] = u
+            dist[u, v] = w
+            prev[u, v] = u
 
     for k in range(num_nodes):
-        for i in range(num_nodes):
-            for j in range(num_nodes):
-                if dist[i][j] > dist[i][k] + dist[k][j]:
-                    dist[i][j] = dist[i][k] + dist[k][j]
-                    prev[i][j] = prev[k][j]
+        new_dist = np.minimum(dist, dist[:, [k]] + dist[[k], :])
+        if np.array_equal(new_dist, dist):
+            break
+        dist = new_dist
 
-    return dist, prev
+    return dist.tolist(), prev.tolist()
