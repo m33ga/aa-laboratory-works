@@ -110,8 +110,17 @@ def main():
         "Random": lambda g, size: g.random(size),
     }
 
-sizes = [10, 100, 200, 300, 500]
-table = PrettyTable()
+    sizes = [20, 100, 200, 300, 450, 600, 1000]
 
-for name, gen in graph_generators.items():
-    benchmark(name, gen, sizes, bfs, dfs, dijkstra, floyd_warshall, prim, kruskal)
+    results = {}
+
+    for name, gen in graph_generators.items():
+        results[name] = benchmark(name, gen, sizes, bfs, dfs, dijkstra, floyd, prim, kruskal)
+
+    print_table(results, algos=['bfs', 'dfs'], sizes=sizes)
+    print_table(results, algos=['dijkstra', 'floyd'], sizes=sizes)
+    print_table(results, algos=['prim', 'kruskal'], sizes=sizes)
+
+
+if __name__ == '__main__':
+    main()
