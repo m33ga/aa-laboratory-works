@@ -1,5 +1,6 @@
 from graph_algorithms.utils.Graph import Graph
-from graph_algorithms.algorithms import dfs, bfs, dijkstra, floyd_warshall, prim, kruskal
+from graph_algorithms.utils.timer import time_function
+from graph_algorithms.algorithms import dfs, bfs, dijkstra, floyd, prim, kruskal
 import matplotlib.pyplot as plt
 from prettytable import PrettyTable
 import time
@@ -20,6 +21,24 @@ def plot_results(res, num_nodes_lst, title, colors):
     plt.legend(fontsize=10, loc='best')
     plt.tight_layout()
     plt.show()
+
+
+def print_table(results, algos, sizes):
+    table = PrettyTable()
+    table.clear()
+    table.title = f"{algos[0].upper()} and {algos[1].upper()} comparison"
+    table.field_names = ["Graph Type\\Number of nodes"] + [str(s) + f" ({algo.upper()})" for s in sizes for algo in algos]
+
+    for graph, res in results.items():
+        row = [graph]
+        for i in range(len(sizes)):
+            for algo in algos:
+                for d in res:
+                    if algo in d.keys():
+                        row.append(f"{d[algo][i]:.6f}")
+        table.add_row(row)
+
+    print(table)
 
 
 def benchmark(graph_name, graph_gen, graph_sizes, algo1, algo2, algo3, algo4, algo5, algo6):
