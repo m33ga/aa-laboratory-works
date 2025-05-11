@@ -41,42 +41,24 @@ def benchmark(graph_name, graph_gen, graph_sizes, algo1, algo2, algo3, algo4, al
         graph_gen(g, size)
         graph_unw = g.get_unweighted_graph()
         graph = g.get_graph()
-
         num_nodes = len(graph.keys())
-        start = time.perf_counter()
-        algo1(graph_unw, num_nodes)
-        end = time.perf_counter()
-        timer = end - start
+
+        timer, _ = time_function(algo1, graph_unw, num_nodes)
         results12[algo1.__name__].append(timer)
 
-        start = time.perf_counter()
-        algo2(graph_unw, num_nodes)
-        end = time.perf_counter()
-        timer = end - start
+        timer, _ = time_function(algo2, graph_unw, num_nodes)
         results12[algo2.__name__].append(timer)
 
-        start = time.perf_counter()
-        algo3(graph, num_nodes)
-        end = time.perf_counter()
-        timer = end - start
+        timer, _ = time_function(algo3, graph, num_nodes)
         results34[algo3.__name__].append(timer)
 
-        start = time.perf_counter()
-        algo4(graph, num_nodes)
-        end = time.perf_counter()
-        timer = end - start
+        timer, _ = time_function(algo4, graph, num_nodes)
         results34[algo4.__name__].append(timer)
 
-        start = time.perf_counter()
-        algo5(graph, num_nodes)
-        end = time.perf_counter()
-        timer = end - start
+        timer, _ = time_function(algo5, graph, num_nodes)
         results56[algo5.__name__].append(timer)
 
-        start = time.perf_counter()
-        algo6(graph, num_nodes)
-        end = time.perf_counter()
-        timer = end - start
+        timer, _ = time_function(algo6, graph, num_nodes)
         results56[algo6.__name__].append(timer)
 
     plot_results(results12, graph_sizes, f"{algo1.__name__.upper()} and {algo2.__name__.upper()} on {graph_name} graph")
