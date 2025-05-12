@@ -1,12 +1,13 @@
+import numpy as np
+
 from graph_algorithms.utils.Graph import Graph
 from graph_algorithms.utils.timer import time_function
 from graph_algorithms.algorithms import dfs, bfs, dijkstra, floyd, prim, kruskal
 import matplotlib.pyplot as plt
 from prettytable import PrettyTable
-import time
 
 
-def plot_results(res, num_nodes_lst, title, colors):
+def plot_results(res, num_nodes_lst, title, colors=plt.cm.tab10.colors):
     plt.figure(figsize=(10, 6))
 
     for idx, (algo_name, res_lst) in enumerate(res.items()):
@@ -27,7 +28,7 @@ def print_table(results, algos, sizes):
     table = PrettyTable()
     table.clear()
     table.title = f"{algos[0].upper()} and {algos[1].upper()} comparison"
-    table.field_names = ["Graph Type\\Number of nodes"] + [str(s) + f" ({algo.upper()})" for s in sizes for algo in algos]
+    table.field_names = ["Graph Type\\Nr of nodes"] + [str(s) + f" ({algo.upper()})" for s in sizes for algo in algos]
 
     for graph, res in results.items():
         row = [graph]
@@ -91,6 +92,34 @@ def benchmark(graph_name, graph_gen, graph_sizes, algo1, algo2, algo3, algo4, al
     return results12, results34, results56
 
 
+def print_aggregated_results(results, sizes):
+    aggregated_results = {}
+    graph_num = 0
+    for g_type, g_res in results.items():
+        graph_num += 1
+        for batch_dict in g_res:
+            for algo, algo_res in batch_dict.items():
+                if algo not in aggregated_results.keys():
+                    aggregated_results[algo] = np.array(algo_res)
+                else:
+                    aggregated_results[algo] += np.array(algo_res)
+    for algo, res in aggregated_results.items():
+        aggregated_results[algo] /= graph_num
+
+    table = PrettyTable()
+    table.clear()
+    table.title = "Aggregated results"
+    table.field_names = ["Algo"] + [str(s) for s in sizes]
+
+    for algo, res in aggregated_results.items():
+        row = [algo]
+        for item in res:
+            row.append(f"{item:.6f}")
+        table.add_row(row)
+
+    print(table)
+
+
 def main():
     graph_generators = {
         "Sparse": lambda g, size: g.sparse(size),
@@ -107,11 +136,11 @@ def main():
         "Complete": lambda g, size: g.complete(size),
         "Negative Weight": lambda g, size: g.with_negative_weights(size),
         "Scale Free": lambda g, size: g.scale_free(size),
+        "Directed": lambda g, size: g.directed(size),
         "Random": lambda g, size: g.random(size),
     }
 
     sizes = [20, 100, 200, 300, 450, 600, 1000]
-
     results = {}
 
     for name, gen in graph_generators.items():
@@ -120,6 +149,8 @@ def main():
     print_table(results, algos=['bfs', 'dfs'], sizes=sizes)
     print_table(results, algos=['dijkstra', 'floyd'], sizes=sizes)
     print_table(results, algos=['prim', 'kruskal'], sizes=sizes)
+
+    print_aggregated_results(results=results, sizes=sizes)
 
 
 if __name__ == '__main__':
