@@ -58,6 +58,10 @@ class Graph:
                 G.add_edge(u, v)
         self._convert_from_nx(G)
 
+    def directed(self, n, p=0.5):
+        G = nx.gnp_random_graph(n=n, p=p, directed=True, seed=random.randint(0, 1000))
+        self._convert_from_nx(G, directed=True)
+
     def bipartite(self, n):
         n1 = n // 2
         n2 = n - n1
