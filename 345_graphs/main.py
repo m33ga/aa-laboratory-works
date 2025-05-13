@@ -5,14 +5,24 @@ from graph_algorithms.utils.timer import time_function
 from graph_algorithms.algorithms import dfs, bfs, dijkstra, floyd, prim, kruskal
 import matplotlib.pyplot as plt
 from prettytable import PrettyTable
+import os
+
+SAVE_DIR = "benchmark_figures"
+os.makedirs(SAVE_DIR, exist_ok=True)
 
 
-def plot_results(res, num_nodes_lst, title, colors=plt.cm.tab10.colors):
+def plot_results(res, num_nodes_lst, title, graph_name, colors=plt.cm.tab10.colors):
     plt.figure(figsize=(10, 6))
 
+    file_name = ""
+
     for idx, (algo_name, res_lst) in enumerate(res.items()):
+        file_name += f"{algo_name}_"
         color = colors[idx % len(colors)]
         plt.plot(num_nodes_lst, res_lst, label=algo_name, color=color, linewidth=2)
+
+    file_name += graph_name.replace(" ", "_")
+    file_path = os.path.join(SAVE_DIR, file_name)
 
     plt.title(title)
     plt.xlabel("Number of Nodes", fontsize=12)
@@ -21,7 +31,8 @@ def plot_results(res, num_nodes_lst, title, colors=plt.cm.tab10.colors):
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.legend(fontsize=10, loc='best')
     plt.tight_layout()
-    plt.show()
+    plt.savefig(file_path + ".png", dpi=300, bbox_inches='tight')
+    plt.close()
 
 
 def print_table(results, algos, sizes):
@@ -86,9 +97,9 @@ def benchmark(graph_name, graph_gen, graph_sizes, algo1, algo2, algo3, algo4, al
         results56[algo6.__name__].append(timer)
 
     colors = plt.cm.tab10.colors
-    plot_results(results12, graph_sizes, f"{algo1.__name__.upper()} and {algo2.__name__.upper()} on {graph_name} graph", colors=colors[0:2])
-    plot_results(results34, graph_sizes, f"{algo3.__name__.upper()} and {algo4.__name__.upper()} on {graph_name} graph", colors=colors[2:4])
-    plot_results(results56, graph_sizes, f"{algo5.__name__.upper()} and {algo6.__name__.upper()} on {graph_name} graph", colors=colors[4:6])
+    plot_results(results12, graph_sizes, f"{algo1.__name__.upper()} and {algo2.__name__.upper()} on {graph_name} graph", graph_name, colors=colors[0:2])
+    plot_results(results34, graph_sizes, f"{algo3.__name__.upper()} and {algo4.__name__.upper()} on {graph_name} graph", graph_name, colors=colors[2:4])
+    plot_results(results56, graph_sizes, f"{algo5.__name__.upper()} and {algo6.__name__.upper()} on {graph_name} graph", graph_name, colors=colors[4:6])
     return results12, results34, results56
 
 
